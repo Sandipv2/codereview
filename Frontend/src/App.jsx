@@ -1,72 +1,72 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import "prismjs/themes/prism-tomorrow.css"
-import Editor from "react-simple-code-editor"
-import prism from "prismjs"
-import Markdown from "react-markdown"
-import rehypeHighlight from "rehype-highlight"
-import "highlight.js/styles/github-dark.css"
-import axios from 'axios'
-import './App.css'
+import { useState, useEffect, useCallback, useRef } from "react";
+import "prismjs/themes/prism-tomorrow.css";
+import Editor from "react-simple-code-editor";
+import prism from "prismjs";
+import Markdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css";
+import axios from "axios";
+import "./App.css";
 
 const DEFAULT_CODE = `function sum() {
   return 1 + 1
-}`
+}`;
 
 function App() {
-  const reviewSessionRef = useRef(0)
-  const [code, setCode] = useState(DEFAULT_CODE)
-  const [review, setReview] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const reviewSessionRef = useRef(0);
+  const [code, setCode] = useState(DEFAULT_CODE);
+  const [review, setReview] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('code-review-theme') || 'dark'
-  })
+    return localStorage.getItem("code-review-theme") || "dark";
+  });
 
   useEffect(() => {
-    localStorage.setItem('code-review-theme', theme)
-    document.documentElement.setAttribute('data-theme', theme)
-  }, [theme])
+    localStorage.setItem("code-review-theme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   useEffect(() => {
-    prism.highlightAll()
-  }, [])
+    prism.highlightAll();
+  }, []);
 
   const startNewChat = useCallback(() => {
-    reviewSessionRef.current += 1
-    setCode(DEFAULT_CODE)
-    setReview('')
-    setError(null)
-    setLoading(false)
-  }, [])
+    reviewSessionRef.current += 1;
+    setCode(DEFAULT_CODE);
+    setReview("");
+    setError(null);
+    setLoading(false);
+  }, []);
 
   const reviewCode = useCallback(async () => {
-    const session = reviewSessionRef.current
-    setError(null)
-    setLoading(true)
+    const session = reviewSessionRef.current;
+    setError(null);
+    setLoading(true);
     try {
-      const response = await axios.post('http://localhost:3000/ai/get-review', { code })
-      if (reviewSessionRef.current === session) setReview(response.data)
+      const response = await axios.post("http://localhost:3000/ai/get-review", {
+        code,
+      });
+      if (reviewSessionRef.current === session) setReview(response.data);
     } catch (err) {
       if (reviewSessionRef.current === session) {
-        setError(err.message || 'Failed to get review')
+        setError(err.message || "Failed to get review");
       }
     } finally {
-      if (reviewSessionRef.current === session) setLoading(false)
+      if (reviewSessionRef.current === session) setLoading(false);
     }
-  }, [code])
-
-  
+  }, [code]);
 
   useEffect(() => {
     function onKeyDown(e) {
-      if (!(e.key === 'Enter' && (e.ctrlKey || e.metaKey))) return
-      e.preventDefault()
-      if (loading) return
-      reviewCode()
+      if (!(e.key === "Enter" && (e.ctrlKey || e.metaKey))) return;
+      e.preventDefault();
+      if (loading) return;
+      reviewCode();
     }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [loading, reviewCode])
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [loading, reviewCode]);
 
   return (
     <div className={`app theme-${theme}`}>
@@ -79,9 +79,7 @@ function App() {
             title="New chat"
             aria-label="Start a new review"
           >
-            <span className="app-logo-mark">
-              &lt;/&gt;
-            </span>
+            <span className="app-logo-mark">&lt;/&gt;</span>
           </button>
         </div>
         <div className="app-header-center">
@@ -92,16 +90,42 @@ function App() {
           <button
             type="button"
             className={`theme-toggle theme-toggle--${theme}`}
-            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+            title={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
+            aria-label={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
           >
             <span className="theme-toggle-thumb" aria-hidden />
             <span className="theme-toggle-icon" aria-hidden>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
             </span>
-            <span className="theme-toggle-icon theme-toggle-icon-sun" aria-hidden>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
+            <span
+              className="theme-toggle-icon theme-toggle-icon-sun"
+              aria-hidden
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+              </svg>
             </span>
           </button>
         </div>
@@ -124,7 +148,7 @@ function App() {
                   Analyze
                 </span>
               ) : (
-                'Review code'
+                "Review code"
               )}
             </button>
           </div>
@@ -132,13 +156,16 @@ function App() {
             <Editor
               value={code}
               onValueChange={setCode}
-              highlight={code => prism.highlight(code, prism.languages.javascript, "javascript")}
+              highlight={(code) =>
+                prism.highlight(code, prism.languages.javascript, "javascript")
+              }
               padding={20}
               style={{
-                fontFamily: '"JetBrains Mono", "Fira Code", "Fira Mono", monospace',
+                fontFamily:
+                  '"JetBrains Mono", "Fira Code", "Fira Mono", monospace',
                 fontSize: 22,
-                minHeight: '100%',
-                width: '100%',
+                minHeight: "100%",
+                width: "100%",
               }}
             />
           </div>
@@ -166,23 +193,20 @@ function App() {
             )}
             {!loading && !error && review && (
               <div className="review-markdown">
-                <Markdown rehypePlugins={[rehypeHighlight]}>
-                  {review}
-                </Markdown>
+                <Markdown rehypePlugins={[rehypeHighlight]}>{review}</Markdown>
               </div>
             )}
             {!loading && !error && !review && (
               <div className="review-placeholder">
-                Use “Review code” or press Ctrl+Enter (⌘+Enter on Mac) for feedback.
+                Use “Review code” or press Ctrl+Enter (⌘+Enter on Mac) for
+                feedback.
               </div>
             )}
           </div>
         </section>
       </main>
     </div>
-  )
+  );
 }
 
-
-
-export default App
+export default App;
