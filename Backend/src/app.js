@@ -10,7 +10,10 @@ app.use(cors())
 app.use(express.json())
 
 app.get('/', (req, res) => {
-    res.send('Hello World')
+    res.status(200).json({
+        status: "OK",
+        service: "API Running"
+    })
 })
 
 app.use('/ai', aiRoutes)
